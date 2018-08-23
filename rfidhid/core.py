@@ -27,8 +27,8 @@ import usb.control
 
 class RfidHid(object):
     r"""Main object used to communicate with the device"""
-    DEFAULT_VID = 0xffff
-    DEFAULT_PID = 0x0035
+    DEFAULT_VID = 0xfffe
+    DEFAULT_PID = 0x0091
     HID_REPORT_DESCRIPTOR_SIZE = 28
     CLASS_TYPE_REPORT = 0x22
     SET_REPORT = 0x09
@@ -45,7 +45,17 @@ class RfidHid(object):
         self.dev = usb.core.find(idVendor=vendor_id, idProduct=product_id)
         if self.dev is None:
             raise ValueError("Device with id %.4x:%.4x not found." % (vendor_id, product_id))
+        try:
+            if self.dev.is_kernel_driver_active(0) is True:
+                self.dev.detach_kernel_driver(0)
+        except usb.core.USBError as e:
+            sys.exit("Kernel driver won't give up control over device: %s" % str(e))
 
+        try:
+            self.dev.set_configuration()
+            self.dev.reset()
+        except usb.core.USBError as e:
+            sys.exit("Cannot set configuration the device: %s" % str(e))
     def init(self):
         r"""Initialize the device
 
