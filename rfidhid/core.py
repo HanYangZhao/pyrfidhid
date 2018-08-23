@@ -24,7 +24,7 @@ import struct
 import usb.core
 import usb.util
 import usb.control
-
+import sys
 class RfidHid(object):
     r"""Main object used to communicate with the device"""
     DEFAULT_VID = 0xfffe
